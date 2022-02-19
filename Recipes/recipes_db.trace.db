@@ -1,0 +1,6 @@
+2022-02-18 19:01:58 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "RECIPE" not found; SQL statement:
+select recipe0_.id as id1_0_0_, recipe0_.description as descript2_0_0_, recipe0_.directions as directio3_0_0_, recipe0_.ingredients as ingredie4_0_0_, recipe0_.name as name5_0_0_ from recipe recipe0_ where recipe0_.id=? [42102-200]
+2022-02-18 19:07:31 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "RECIPE" not found; SQL statement:
+select recipe0_.id as id1_0_0_, recipe0_.description as descript2_0_0_, recipe0_.directions as directio3_0_0_, recipe0_.ingredients as ingredie4_0_0_, recipe0_.name as name5_0_0_ from recipe recipe0_ where recipe0_.id=? [42102-200]

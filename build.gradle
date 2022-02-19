@@ -4,6 +4,8 @@ subprojects {
     apply plugin: 'application'
     apply plugin: 'java'
 
+    mainClassName = 'recipes.RecipesApplication'
+
     def userJava = Integer.parseInt(JavaVersion.current().getMajorVersion())
     def hsJava = Integer.parseInt(hs.java.version)
     def testJava = Math.max(userJava, hsJava)
