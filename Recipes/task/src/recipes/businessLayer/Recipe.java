@@ -1,5 +1,6 @@
 package recipes.businessLayer;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,6 +9,8 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 
 @Data
@@ -30,6 +33,11 @@ public class Recipe {
     @NotBlank
     private String description;
 
+    @Column(name = "category")
+    @NotNull
+    @NotBlank
+    private String category; //might need to turn to an enum later
+
     @Column(name = "ingredients")
     @NotNull
     @Size(min=1)
@@ -39,5 +47,14 @@ public class Recipe {
     @NotNull
     @Size(min=1)
     private String[] directions;
+
+    //@Temporal(TemporalType.DATE)
+    @Column(name = "date")
+    private LocalDateTime date;
+
+    @JsonIgnore
+    public long getId() {
+        return id;
+    }
 
 }

@@ -634,6 +634,335 @@ files:
         }
     }
   learner_created: false
+- name: src/recipes/Controllers/RecipeController.java
+  visible: true
+  text: |-
+    package recipes.Controllers;
+
+    import lombok.AllArgsConstructor;
+    import lombok.Data;
+    import lombok.NoArgsConstructor;
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.http.HttpStatus;
+    import org.springframework.web.bind.annotation.*;
+    import org.springframework.web.server.ResponseStatusException;
+    import recipes.businessLayer.*;
+    import recipes.Resources.IdGenerator;
+    import recipes.businessLayer.RecipeService;
+
+    import javax.persistence.Column;
+
+    @RestController
+    public class RecipeController {
+
+        @Autowired
+        RecipeService recipeService;
+
+        @GetMapping("/api/recipe/{id}")
+        public RecipeResponseModel getRecipe(@PathVariable Long id) {
+
+            Recipe recipe = recipeService.findRecipeById(id);
+            //Recipe recipe = recipes.get(id);
+            if(recipe==null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND) ;
+            }
+            else
+                return new RecipeResponseModel(recipe.getName(), recipe.getDescription(), recipe.getIngredients(), recipe.getDirections());
+        }
+
+        @PostMapping("/api/recipe/new")
+        public IdResponse postRecipe(@RequestBody Recipe req) {
+            Long id = (long) IdGenerator.generate(1000);
+
+            try {
+                Recipe recipeCreate = recipeService.save(new Recipe(id,
+                        req.getName(),
+                        req.getDescription(),
+                        req.getIngredients(),
+                        req.getDirections()));
+            } catch (Exception ex) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            }
+
+            //recipes.put(id, req);
+            return new IdResponse(id);
+        }
+
+        @DeleteMapping("/api/recipe/{id}")
+        public void deleteRecipe(@PathVariable Long id) {
+            try {
+                recipeService.delete(id);
+            } catch(Exception ex) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            }
+
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT);
+        }
+
+        @Data
+        @AllArgsConstructor
+        class IdResponse {
+            Long id;
+        }
+
+        @Data
+        @AllArgsConstructor
+        class RecipeResponseModel {
+            private String name;
+            private String description;
+            private String[] ingredients;
+            private String[] directions;
+        }
+
+    }
+  learner_created: true
+- name: src/recipes/businessLayer/Recipe.java
+  visible: true
+  text: |
+    package recipes.businessLayer;
+
+    import lombok.AllArgsConstructor;
+    import lombok.Data;
+    import lombok.NoArgsConstructor;
+
+    import javax.persistence.*;
+    import javax.validation.constraints.NotBlank;
+    import javax.validation.constraints.NotNull;
+    import javax.validation.constraints.Size;
+
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Entity
+    @Table(name="recipe")
+    public class Recipe {
+
+        @Id
+        private long id;
+
+        @Column(name="name")
+        @NotNull
+        @NotBlank
+        private String name;
+
+        @Column(name = "description")
+        @NotNull
+        @NotBlank
+        private String description;
+
+        @Column(name = "ingredients")
+        @NotNull
+        @Size(min=1)
+        private String[] ingredients;
+
+        @Column(name = "directions")
+        @NotNull
+        @Size(min=1)
+        private String[] directions;
+
+    }
+  learner_created: true
+- name: src/recipes/persistenceLayer/RecipeRepository.java
+  visible: true
+  text: |
+    package recipes.persistenceLayer;
+
+    import org.springframework.data.repository.CrudRepository;
+    import org.springframework.stereotype.Repository;
+    import recipes.businessLayer.Recipe;
+    //import repository, Crud repository and the business layer
+
+
+    @Repository
+    public interface RecipeRepository extends CrudRepository<Recipe, Long> {
+
+        Recipe findRecipeById(Long id);
+
+    }
+  learner_created: true
+- name: src/recipes/Resources/IdGenerator.java
+  visible: true
+  text: |
+    package recipes.Resources;
+
+    import org.springframework.stereotype.Component;
+
+    import java.util.Random;
+
+    @Component
+    public class IdGenerator {
+
+        private static final Random random = new Random();
+
+        public static Integer generate(int n) {
+            return random.nextInt(n);
+        }
+
+    }
+  learner_created: true
+- name: src/recipes/businessLayer/RecipeService.java
+  visible: true
+  text: |
+    package recipes.businessLayer;
+
+    import org.springframework.stereotype.Service;
+    import org.springframework.beans.factory.annotation.Autowired;
+    import recipes.persistenceLayer.RecipeRepository;
+
+    @Service
+    public class RecipeService {
+
+        private final RecipeRepository recipeRepository;
+
+        @Autowired
+        public RecipeService(RecipeRepository repo) {
+            this.recipeRepository = repo;
+        }
+
+        public Recipe findRecipeById(Long id) {
+            return recipeRepository.findRecipeById(id);
+        }
+        //store
+        public Recipe save(Recipe toSave) {
+            return recipeRepository.save(toSave);
+        }
+
+        //delete by id
+        public void delete(Long id) {
+            recipeRepository.deleteById(id);
+        }
+
+
+    }
+  learner_created: true
 feedback_link: https://hyperskill.org/projects/180/stages/920/implement#comment
-status: Unchecked
+status: Failed
+feedback:
+  message: |-
+    Wrong answer in test #28
+
+    The JSON array has an incorrect length: should be equal to 6, found 3
+
+    Full JSON:
+    [
+      {
+        &quot;name&quot;: &quot;ice-cream&quot;,
+        &quot;description&quot;: &quot;-&quot;,
+        &quot;category&quot;: &quot;DESSERT&quot;,
+        &quot;ingredients&quot;: [
+          &quot;----&quot;,
+          &quot;--&quot;
+        ],
+        &quot;directions&quot;: [
+          &quot;-&quot;,
+          &quot;--&quot;,
+          &quot;-&quot;
+        ],
+        &quot;date&quot;: &quot;2022-02-21T14:21:37.773412&quot;
+      },
+      {
+        &quot;name&quot;: &quot;ICE-CREAM&quot;,
+        &quot;description&quot;: &quot;----&quot;,
+        &quot;category&quot;: &quot;desserT&quot;,
+        &quot;ingredients&quot;: [
+          &quot;-&quot;,
+          &quot;-&quot;,
+          &quot;--&quot;
+        ],
+        &quot;directions&quot;: [
+          &quot;---&quot;,
+          &quot;--&quot;,
+          &quot;--&quot;
+        ],
+        &quot;date&quot;: &quot;2022-02-21T14:21:37.615232&quot;
+      },
+      {
+        &quot;name&quot;: &quot;ice-cream&quot;,
+        &quot;description&quot;: &quot;-&quot;,
+        &quot;category&quot;: &quot;Dessert&quot;,
+        &quot;ingredients&quot;: [
+          &quot;--&quot;,
+          &quot;---&quot;,
+          &quot;-&quot;
+        ],
+        &quot;directions&quot;: [
+          &quot;----&quot;,
+          &quot;---&quot;
+        ],
+        &quot;date&quot;: &quot;2022-02-21T14:21:37.5258&quot;
+      }
+    ]
+
+    Please find below the output of your program during this failed test.
+
+    ---
+
+    .   ____          _            __ _ _
+     /\\ / ___&#39;_ __ _ _(_)_ __  __ _ \ \ \ \
+    ( ( )\___ | &#39;_ | &#39;_| | &#39;_ \/ _` | \ \ \ \
+     \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+      &#39;  |____| .__|_| |_|_| |_\__, | / / / /
+     =========|_|==============|___/=/_/_/_/
+     :: Spring Boot ::                (v2.5.6)
+
+    2022-02-21 14:21:28.751  INFO 48558 --- [    Test worker] recipes.RecipesApplication               : Starting RecipesApplication using Java 17.0.1 on Rauls-MBP-2.home with PID 48558 (started by raul in /Users/raul/Desktop/Recipes/Recipes/task)
+    2022-02-21 14:21:28.754  INFO 48558 --- [    Test worker] recipes.RecipesApplication               : No active profile set, falling back to default profiles: default
+    2022-02-21 14:21:29.998  INFO 48558 --- [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+    2022-02-21 14:21:30.071  INFO 48558 --- [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 59 ms. Found 1 JPA repository interfaces.
+    2022-02-21 14:21:30.780  INFO 48558 --- [    Test worker] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8881 (http)
+    2022-02-21 14:21:30.794  INFO 48558 --- [    Test worker] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+    2022-02-21 14:21:30.795  INFO 48558 --- [    Test worker] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.54]
+    2022-02-21 14:21:30.983  INFO 48558 --- [    Test worker] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+    2022-02-21 14:21:30.984  INFO 48558 --- [    Test worker] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2169 ms
+    2022-02-21 14:21:31.435  INFO 48558 --- [    Test worker] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+    2022-02-21 14:21:31.510  INFO 48558 --- [    Test worker] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 5.4.32.Final
+    2022-02-21 14:21:31.718  INFO 48558 --- [    Test worker] o.hibernate.annotations.common.Version   : HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+    2022-02-21 14:21:31.840  INFO 48558 --- [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+    2022-02-21 14:21:32.316  INFO 48558 --- [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+    2022-02-21 14:21:32.362  INFO 48558 --- [    Test worker] org.hibernate.dialect.Dialect            : HHH000400: Using dialect: org.hibernate.dialect.H2Dialect
+    2022-02-21 14:21:33.540  INFO 48558 --- [    Test worker] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+    2022-02-21 14:21:33.552  INFO 48558 --- [    Test worker] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit &#39;default&#39;
+    2022-02-21 14:21:34.068  WARN 48558 --- [    Test worker] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+    2022-02-21 14:21:34.777  INFO 48558 --- [    Test worker] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 14 endpoint(s) beneath base path &#39;/actuator&#39;
+    2022-02-21 14:21:34.829  INFO 48558 --- [    Test worker] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8881 (http) with context path &#39;&#39;
+    2022-02-21 14:21:34.850  INFO 48558 --- [    Test worker] recipes.RecipesApplication               : Started RecipesApplication in 6.54 seconds (JVM running for 7.594)
+    2022-02-21 14:21:35.347  INFO 48558 --- [nio-8881-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet &#39;dispatcherServlet&#39;
+    2022-02-21 14:21:35.347  INFO 48558 --- [nio-8881-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet &#39;dispatcherServlet&#39;
+    2022-02-21 14:21:35.349  INFO 48558 --- [nio-8881-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+    2022-02-21 14:21:36.306  INFO 48558 --- [       Thread-5] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit &#39;default&#39;
+    2022-02-21 14:21:36.308  INFO 48558 --- [       Thread-5] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+    2022-02-21 14:21:36.390  INFO 48558 --- [       Thread-5] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+
+      .   ____          _            __ _ _
+     /\\ / ___&#39;_ __ _ _(_)_ __  __ _ \ \ \ \
+    ( ( )\___ | &#39;_ | &#39;_| | &#39;_ \/ _` | \ \ \ \
+     \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+      &#39;  |____| .__|_| |_|_| |_\__, | / / / /
+     =========|_|==============|___/=/_/_/_/
+     :: Spring Boot ::                (v2.5.6)
+
+    2022-02-21 14:21:36.436  INFO 48558 --- [    Test worker] recipes.RecipesApplication               : Starting RecipesApplication using Java 17.0.1 on Rauls-MBP-2.home with PID 48558 (started by raul in /Users/raul/Desktop/Recipes/Recipes/task)
+    2022-02-21 14:21:36.436  INFO 48558 --- [    Test worker] recipes.RecipesApplication               : No active profile set, falling back to default profiles: default
+    2022-02-21 14:21:36.721  INFO 48558 --- [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+    2022-02-21 14:21:36.730  INFO 48558 --- [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 8 ms. Found 1 JPA repository interfaces.
+    2022-02-21 14:21:36.828  INFO 48558 --- [    Test worker] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8881 (http)
+    2022-02-21 14:21:36.828  INFO 48558 --- [    Test worker] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+    2022-02-21 14:21:36.829  INFO 48558 --- [    Test worker] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.54]
+    2022-02-21 14:21:36.853  INFO 48558 --- [    Test worker] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+    2022-02-21 14:21:36.854  INFO 48558 --- [    Test worker] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 416 ms
+    2022-02-21 14:21:36.945  INFO 48558 --- [    Test worker] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+    2022-02-21 14:21:36.948  INFO 48558 --- [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+    2022-02-21 14:21:36.959  INFO 48558 --- [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+    2022-02-21 14:21:36.959  INFO 48558 --- [    Test worker] org.hibernate.dialect.Dialect            : HHH000400: Using dialect: org.hibernate.dialect.H2Dialect
+    2022-02-21 14:21:37.013  INFO 48558 --- [    Test worker] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+    2022-02-21 14:21:37.014  INFO 48558 --- [    Test worker] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit &#39;default&#39;
+    2022-02-21 14:21:37.090  WARN 48558 --- [    Test worker] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+    2022-02-21 14:21:37.294  INFO 48558 --- [    Test worker] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 14 endpoint(s) beneath base path &#39;/actuator&#39;
+    2022-02-21 14:21:37.320  INFO 48558 --- [    Test worker] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8881 (http) with context path &#39;&#39;
+    2022-02-21 14:21:37.329  INFO 48558 --- [    Test worker] recipes.RecipesApplication               : Started RecipesApplication in 0.929 seconds (JVM running for 10.073)
+    2022-02-21 14:21:37.344  INFO 48558 --- [nio-8881-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet &#39;dispatcherServlet&#39;
+    2022-02-21 14:21:37.345  INFO 48558 --- [nio-8881-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet &#39;dispatcherServlet&#39;
+    2022-02-21 14:21:37.347  INFO 48558 --- [nio-8881-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+  time: Mon, 21 Feb 2022 22:21:38 UTC
 record: -1

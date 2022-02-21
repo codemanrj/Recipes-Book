@@ -308,25 +308,6 @@ files:
         }
     }
   learner_created: false
-- name: src/recipes/Models/Recipe.java
-  visible: true
-  text: |-
-    package recipes.Models;
-
-    import lombok.AllArgsConstructor;
-    import lombok.Data;
-    import lombok.NoArgsConstructor;
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public class Recipe {
-        private String name;
-        private String description;
-        private String[] ingredients;
-        private String[] directions;
-    }
-  learner_created: true
 - name: src/recipes/Controllers/RecipeController.java
   visible: true
   text: |-
@@ -409,4 +390,4 @@ status: Solved
 feedback:
   message: Congratulations!
   time: Sat, 19 Feb 2022 07:27:45 UTC
-record: -1
+record: 3
